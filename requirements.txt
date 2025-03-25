@@ -3,3 +3,5 @@ crewai
 crewai[tools]
 langchain
 streamlit
+python-dotenv
+pathlib
