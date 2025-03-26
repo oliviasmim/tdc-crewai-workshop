@@ -8,8 +8,7 @@ pathlib
 textwrap
 chromadb
 pdfkit 
-markdown 
-wkhtmltopdf
+markdown
 langchain_community
 langchain-chroma
 numpy
