@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 import datetime
-import time
 
 # Add parent directory to path for imports
 project_root = Path(__file__).parent.parent
@@ -13,9 +12,7 @@ os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
 os.environ["OTEL_SDK_DISABLED"] = "true"
 
 from dotenv import load_dotenv
-from crewai import Crew
-from crewai.agent import Agent
-from crewai.task import Task
+from crewai import Crew, Process
 
 # Import agent and task creators
 from agents import TechContentCreator
@@ -24,7 +21,7 @@ from tasks import TechContentResearchTasks
 # Load environment variables
 load_dotenv()
 
-def run_research(tech_theme, model="GPT-4 Turbo", research_focus=None, 
+def run_research(tech_theme, research_focus=None, 
                 target_audience="Mixed", depth=3, progress_callback=None):
     """
     Run the tech content research with progress updates for Streamlit
@@ -40,12 +37,7 @@ def run_research(tech_theme, model="GPT-4 Turbo", research_focus=None,
     Returns:
         tuple: (results, output_file_path)
     """
-    # Initialize agent creator with model choice
     agent_creator = TechContentCreator()
-    if model == "GPT-3.5 Turbo":
-        agent_creator.llm.model_name = "gpt-3.5-turbo"
-    else:
-        agent_creator.llm.model_name = "gpt-4-turbo"
     
     # Initialize agents
     trend_researcher = agent_creator.trend_researcher_agent()
@@ -57,42 +49,56 @@ def run_research(tech_theme, model="GPT-4 Turbo", research_focus=None,
     # Initialize task creator
     task_creator = TechContentResearchTasks()
     
-    # Create tasks
+    # Create first task - trend research
     research_task = task_creator.trend_research_task(trend_researcher, tech_theme)
     
     # Update progress for task 1
     if progress_callback:
         progress_callback(0, f"Researching trends in {tech_theme}...")
     
-    # Second task with dependency on first
-    analysis_task = task_creator.technical_analysis_task(technical_expert, tech_theme)
+    # Second task WITH explicit dependency on first task
+    analysis_task = task_creator.technical_analysis_task(
+        technical_expert, 
+        tech_theme,
+        context=[research_task]  # Depends on research task
+    )
     
     # Progress update
     if progress_callback:
         progress_callback(1, f"Analyzing technical details of {tech_theme} trends...")
     
     # Structure task depends on research and analysis
-    structure_task = task_creator.content_structure_task(content_specialist)
+    structure_task = task_creator.content_structure_task(
+        content_specialist,
+        context=[research_task, analysis_task]  # Depends on both previous tasks
+    )
     
     # Progress update
     if progress_callback:
         progress_callback(2, f"Creating content structure for {tech_theme} article...")
     
     # Source validation task
-    validation_task = task_creator.source_validation_task(source_validator)
+    validation_task = task_creator.source_validation_task(
+        source_validator,
+        context=[research_task, analysis_task]  # Validate sources from research and analysis
+    )
     
     # Progress update
     if progress_callback:
         progress_callback(3, f"Validating sources for {tech_theme} research...")
     
     # Final review task
-    review_task = task_creator.final_review_task(editor, tech_theme)
+    review_task = task_creator.final_review_task(
+        editor, 
+        tech_theme,
+        context=[research_task, analysis_task, structure_task, validation_task]  # Depends on ALL previous tasks
+    )
     
     # Progress update
     if progress_callback:
         progress_callback(4, f"Finalizing comprehensive report on {tech_theme}...")
     
-    # Create crew with explicit task dependencies
+    # Create crew with task workflow (order matters)
     crew = Crew(
         agents=[
             trend_researcher,
@@ -109,14 +115,15 @@ def run_research(tech_theme, model="GPT-4 Turbo", research_focus=None,
             review_task
         ],
         verbose=True,
+        process=Process.sequential # Run tasks in sequence
     )
     
     # Run the crew with input context
     context = {
         "theme": tech_theme,
-        "focus": research_focus,
-        "audience": target_audience,
-        "depth": depth
+        "focus": research_focus, # TODO: Decoratative, not implemented in tasks
+        "audience": target_audience, # TODO: Decoratative, not implemented in tasks
+        "depth": depth # TODO: Decoratative, not implemented in tasks
     }
     
     result = crew.kickoff(inputs=context)

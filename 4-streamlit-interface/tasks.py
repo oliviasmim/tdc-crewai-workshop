@@ -2,7 +2,7 @@ from crewai import Task
 from textwrap import dedent
 
 class TechContentResearchTasks:
-    def trend_research_task(self, agent, tech_theme):
+    def trend_research_task(self, agent, tech_theme, context=None):
         return Task(description=dedent(f"""\
             Research the latest trends related to {tech_theme} in the technology industry.
             
@@ -26,10 +26,11 @@ class TechContentResearchTasks:
             It's currently 2024, so ensure your information is up-to-date.
             """),
             agent=agent,
-            expected_output="A comprehensive research report identifying at least 5 major trends in the specified technology theme, with supporting data, statistics, timeline information, and credible sources."
+            expected_output="A comprehensive research report identifying at least 5 major trends in the specified technology theme, with supporting data, statistics, timeline information, and credible sources.",
+            context=context
         )
     
-    def technical_analysis_task(self, agent, tech_theme):
+    def technical_analysis_task(self, agent, tech_theme, context=None):
         return Task(description=dedent(f"""\
             Conduct a deep technical analysis of the trends identified in {tech_theme}.
             
@@ -54,10 +55,11 @@ class TechContentResearchTasks:
             credible technical sources.
             """),
             agent=agent,
-            expected_output="A detailed technical analysis of each major trend, including underlying technologies, architectures, limitations, future developments, and cross-industry applications, supported by technical documentation and expert opinions."
+            expected_output="A detailed technical analysis of each major trend, including underlying technologies, architectures, limitations, future developments, and cross-industry applications, supported by technical documentation and expert opinions.",
+            context=context
         )
     
-    def content_structure_task(self, agent):
+    def content_structure_task(self, agent, context=None):
         return Task(description=dedent("""\
             Create a comprehensive article outline based on the research findings and
             technical analysis provided.
@@ -83,10 +85,11 @@ class TechContentResearchTasks:
             follow to create a technically accurate, well-structured article.
             """),
             agent=agent,
-            expected_output="A comprehensive article outline with hierarchical structure, section descriptions, visual element suggestions, word count estimates, and recommendations for hooks and conclusions."
+            expected_output="A comprehensive article outline with hierarchical structure, section descriptions, visual element suggestions, word count estimates, and recommendations for hooks and conclusions.",
+            context=context
         )
     
-    def source_validation_task(self, agent):
+    def source_validation_task(self, agent, context=None):
         return Task(description=dedent("""\
             Review and validate all sources and references used in the research and
             technical analysis.
@@ -112,10 +115,11 @@ class TechContentResearchTasks:
             where possible.
             """),
             agent=agent,
-            expected_output="A validated bibliography with evaluation notes for each source, identification of problematic sources, suggestions for additional references, and recommendations for expert quotes or interviews."
+            expected_output="A validated bibliography with evaluation notes for each source, identification of problematic sources, suggestions for additional references, and recommendations for expert quotes or interviews.",
+            context=context
         )
     
-    def final_review_task(self, agent, tech_theme):
+    def final_review_task(self, agent, tech_theme, context=None):
         return Task(description=dedent(f"""\
             Review and integrate all elements (research, technical analysis, outline, and sources)
             into a final comprehensive article blueprint on {tech_theme}.
@@ -145,5 +149,6 @@ class TechContentResearchTasks:
             business audiences interested in this technology space.
             """),
             agent=agent,
-            expected_output="A complete article blueprint with executive summary, integrated outline, curated source list, content recommendations, and publication readiness assessment for the specified technology theme."
+            expected_output="A complete article blueprint in MD format only, with executive summary, integrated outline, curated source list, content recommendations, and publication readiness assessment for the specified technology theme.",
+            context=context
         )

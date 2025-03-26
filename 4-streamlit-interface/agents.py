@@ -13,103 +13,8 @@ web_search_tool = WebsiteSearchTool()
 
 class TechContentCreator:
     def __init__(self):
-        self.llm = ChatOpenAI(model="gpt-4-turbo")
-
-    def product_competitor_agent(self):
-        return Agent(
-            role="Lead Market Analyst",
-            goal=dedent("""\
-				Conduct amazing analysis of the products and
-				competitors, providing in-depth insights to guide
-				marketing strategies."""),
-            backstory=dedent("""\
-				As the Lead Market Analyst at a premier
-				digital marketing firm, you specialize in dissecting
-				online business landscapes."""),
-            tools=[
-                search_tool
-            ],
-            allow_delegation=False,
-            llm=self.llm,
-            verbose=True
-        )
-
-    def strategy_planner_agent(self):
-        return Agent(
-            role="Chief Marketing Strategist",
-            goal=dedent("""\
-				Synthesize amazing insights from product analysis
-				to formulate incredible marketing strategies."""),
-            backstory=dedent("""\
-				You are the Chief Marketing Strategist at
-				a leading digital marketing agency, known for crafting
-				bespoke strategies that drive success."""),
-            tools=[
-                search_tool
-            ],
-            llm=self.llm,
-            verbose=True
-        )
-
-    def creative_content_creator_agent(self):
-        return Agent(
-            role="Creative Content Creator",
-            goal=dedent("""\
-				Develop compelling and innovative content
-				for social media campaigns, with a focus on creating
-				high-impact Instagram ad copies."""),
-            backstory=dedent("""\
-				As a Creative Content Creator at a top-tier
-				digital marketing agency, you excel in crafting narratives
-				that resonate with audiences on social media.
-				Your expertise lies in turning marketing strategies
-				into engaging stories and visual content that capture
-				attention and inspire action."""),
-            tools=[
-                search_tool
-            ],
-            llm=self.llm,
-            verbose=True
-        )
-
-    def senior_photographer_agent(self):
-        return Agent(
-            role="Senior Photographer",
-            goal=dedent("""\
-					Take the most amazing photographs for instagram ads that
-					capture emotions and convey a compelling message."""),
-            backstory=dedent("""\
-					As a Senior Photographer at a leading digital marketing
-					agency, you are an expert at taking amazing photographs that
-					inspire and engage, you're now working on a new campaign for a super
-					important customer and you need to take the most amazing photograph."""),
-            tools=[
-                search_tool
-            ],
-            llm=self.llm,
-            allow_delegation=False,
-            verbose=True
-        )
-
-    def chief_creative_diretor_agent(self):
-        return Agent(
-            role="Chief Creative Director",
-            goal=dedent("""\
-					Oversee the work done by your team to make sure it's the best
-					possible and aligned with the product's goals, review, approve,
-					ask clarifying question or delegate follow up work if necessary to make
-					decisions"""),
-            backstory=dedent("""\
-					You're the Chief Content Officer of leading digital
-					marketing specialized in product branding. You're working on a new
-					customer, trying to make sure your team is crafting the best possible
-					content for the customer."""),
-            tools=[
-                search_tool
-            ],
-            llm=self.llm,
-            verbose=True
-        )
+        self.llm = ChatOpenAI(model="gpt-4o-mini")
+        self.creative_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
 
     def trend_researcher_agent(self):
         return Agent(
@@ -126,10 +31,10 @@ class TechContentCreator:
                 the most reliable and cutting-edge information."""),
             tools=[
                 search_tool,
-                web_search_tool
+                web_search_tool,
             ],
             allow_delegation=False,
-            llm=self.llm,
+            llm=self.creative_llm,
             verbose=True
         )
 
@@ -149,7 +54,7 @@ class TechContentCreator:
                 evolve based on technical fundamentals."""),
             tools=[
                 search_tool,
-                web_search_tool
+                web_search_tool,
             ],
             llm=self.llm,
             verbose=True
@@ -170,7 +75,7 @@ class TechContentCreator:
                 even when covering highly technical subjects. You understand how to balance
                 depth with readability."""),
             tools=[
-                search_tool
+                search_tool,
             ],
             llm=self.llm,
             verbose=True
@@ -192,7 +97,7 @@ class TechContentCreator:
                 sources."""),
             tools=[
                 search_tool,
-                web_search_tool
+                web_search_tool,
             ],
             allow_delegation=False,
             llm=self.llm,
@@ -214,7 +119,7 @@ class TechContentCreator:
                 logical inconsistencies, and opportunities to strengthen content through
                 additional context or sources."""),
             tools=[
-                search_tool
+                search_tool,
             ],
             llm=self.llm,
             verbose=True

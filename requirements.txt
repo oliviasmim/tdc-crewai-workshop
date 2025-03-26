@@ -5,3 +5,11 @@ langchain
 streamlit
 python-dotenv
 pathlib
+textwrap
+chromadb
+pdfkit 
+markdown 
+wkhtmltopdf
+langchain_community
+langchain-chroma
+numpy

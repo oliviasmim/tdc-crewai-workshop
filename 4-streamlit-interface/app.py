@@ -1,9 +1,13 @@
-import os
 import sys
 import streamlit as st
-import time
 from pathlib import Path
-import datetime
+import traceback
+
+# WORKSHOP: Streamlit basics
+# 1. Import streamlit as st - this is the conventional way to import
+# 2. Run with: streamlit run app.py
+# 3. The app will automatically reload when you save changes
+
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
@@ -11,16 +15,28 @@ sys.path.append(str(project_root))
 
 # Import research engine and utilities
 from research_engine import run_research
-from utils.display import display_results, render_markdown
-from utils.markdown_export import format_markdown, save_markdown
+
+# WORKSHOP: Page Configuration
+# Use set_page_config to customize the app appearance
+# Must be called as the first Streamlit command in the script
+# Arguments:
+# - page_title: Title of the app
+# - page_icon: Icon to display in the browser tab
+# - layout: "centered" or "wide" (default)
+# - initial_sidebar_state: "auto" (default), "expanded", or "collapsed"
+# Example: st.set_page_config(page_title="My App", page_icon="🧊", layout="wide", initial_sidebar_state="expanded")
 
 # Page configuration
 st.set_page_config(
     page_title="Tech Content Research Assistant",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_icon="📊",  # You can use emojis or file paths
+    layout="wide",   # Options: "centered" or "wide"
+    initial_sidebar_state="expanded"  # Options: "expanded" or "collapsed"
 )
+
+# WORKSHOP: Basic Text Elements
+# st.title() - Main application title
+# st.markdown() - For text with markdown formatting
 
 # App title and description
 st.title("🔍 Tech Content Research Assistant")
@@ -31,16 +47,23 @@ analyze technical details, structure content, and validate sources.
 """)
 
 # Sidebar with options
+# Use with st.sidebar: to add elements to the sidebar
+# st.header() - Sidebar section header
+# st.selectbox() - Dropdown selection
+# st.slider() - Slider input
+# st.checkbox() - Checkbox input
+# st.markdown() - Text with markdown formatting
+
 with st.sidebar:
     st.header("Research Options")
     model_option = st.selectbox(
-        "Select Language Model",
-        ["GPT-3.5 Turbo", "GPT-4 Turbo"],
-        index=1
+        "Select Language Model (Decorative)",
+        ["gpt-4o-mini"],
+        index=0
     )
     
     search_depth = st.slider(
-        "Research Depth",
+        "Research Depth (Decorative)",
         min_value=1,
         max_value=5,
         value=3,
@@ -52,21 +75,24 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### About")
     st.markdown("This app uses CrewAI to orchestrate a team of specialized AI agents.")
-    
+ 
+# IMPORTANT: Main content area    
 # Main input area
 tech_theme = st.text_input("Enter a technology theme to research:", placeholder="e.g., Quantum Computing, Edge AI, Web3")
 
 # Research parameters
-col1, col2 = st.columns(2)
+# Use st.columns() to create multiple columns
+col1, col2 = st.columns(2)  # Creates two equal-width columns
 with col1:
+      # WORKSHOP: Multi-select Input
     research_focus = st.multiselect(
-        "Research Focus Areas (Optional)",
+        "Research Focus Areas (Decorative)",
         ["Current Trends", "Technical Details", "Industry Applications", "Future Developments", "Market Analysis"],
         default=["Current Trends", "Technical Details", "Future Developments"]
     )
 with col2:
     target_audience = st.selectbox(
-        "Target Audience",
+        "Target Audience (Decorative)",
         ["Technical Professionals", "Business Decision Makers", "General Audience", "Mixed"],
         index=3
     )
@@ -74,7 +100,13 @@ with col2:
 # Start research button
 start_col, _ = st.columns([1, 3])
 with start_col:
+    # type="primary" makes it stand out
     start_research = st.button("Start Research", type="primary", use_container_width=True)
+
+# WORKSHOP: Session State
+# Use session_state to persist data between reruns
+# st.session_state is a dictionary that persists across reruns
+# Think about it as a store for your app's state, like in React or Vue
 
 # Initialize session state to store results
 if 'research_complete' not in st.session_state:
@@ -122,7 +154,6 @@ if start_research and tech_theme:
         # Run the research process
         result, output_file = run_research(
             tech_theme=tech_theme,
-            model=model_option,
             research_focus=research_focus,
             target_audience=target_audience,
             depth=search_depth,
@@ -140,6 +171,8 @@ if start_research and tech_theme:
         
     except Exception as e:
         st.error(f"An error occurred during research: {str(e)}")
+        # Debug info - show traceback
+        st.expander("Debug Details").write(traceback.format_exc())
         st.session_state.research_complete = False
 
 # Display results if research is complete
@@ -147,40 +180,34 @@ if st.session_state.research_complete and st.session_state.research_results:
     st.markdown("---")
     st.header("Research Results")
     
-    # Create tabs for different result sections
-    tabs = st.tabs(["Summary", "Trends", "Technical Analysis", "Content Outline", "Sources"])
-    
-    with tabs[0]:  # Summary
-        st.markdown("## Executive Summary")
-        if hasattr(st.session_state.research_results, 'executive_summary'):
-            st.markdown(st.session_state.research_results.executive_summary)
-        else:
-            st.markdown(st.session_state.research_results.raw[:1000] + "...")
-    
-    # Display full results in other tabs
-    display_results(st.session_state.research_results, tabs)
-    
-    # Download options
+    # Create tabs for different result sections    
+    try:
+        # Get full content for display
+        content = st.session_state.research_results.raw
+        st.markdown(content)
+        
+    except Exception as e:
+        st.error(f"Error displaying results: {str(e)}")
+        st.write(st.session_state.research_results.raw) 
+    # Download options - only Markdown, no PDF
     st.markdown("---")
-    col1, col2 = st.columns(2)
     
-    with col1:
+    try:
+        with open(st.session_state.output_file, 'r') as f:
+            markdown_data = f.read()
+            
         st.download_button(
             label="Download Full Report (Markdown)",
-            data=open(st.session_state.output_file, 'r').read(),
+            data=markdown_data,
             file_name=f"{tech_theme.replace(' ', '_').lower()}_research.md",
             mime="text/markdown"
         )
-    
-    with col2:
-        st.download_button(
-            label="Download as PDF",
-            data=render_markdown(st.session_state.output_file),
-            file_name=f"{tech_theme.replace(' ', '_').lower()}_research.pdf",
-            mime="application/pdf"
-        )
+    except Exception as e:
+        st.error(f"Error preparing download: {str(e)}")
 
-# Display a message if no research has been done yet
+# WORKSHOP: Info Messages
+# Different message types: st.info(), st.warning(), st.error(), st.success()
+# Use these to provide feedback to users based on app state
 if not tech_theme and not st.session_state.research_complete:
     st.info("Enter a technology theme above and click 'Start Research' to begin.")
 elif tech_theme and not st.session_state.research_complete and not start_research:

@@ -9,7 +9,7 @@ from utils.disable_telemetry import disable_telemetry
 disable_telemetry()
 
 from dotenv import load_dotenv
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew
 
 load_dotenv()
 
@@ -37,7 +37,7 @@ greet_task = Task(
 crew = Crew(
     agents=[greeter_agent],
     tasks=[greet_task],
-    verbose=True,
+    # verbose=True,
 )
 
 # Run the crew (no input needed for this static task)
