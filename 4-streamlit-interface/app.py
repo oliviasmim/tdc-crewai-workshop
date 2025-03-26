@@ -8,7 +8,6 @@ import traceback
 # 2. Run with: streamlit run app.py
 # 3. The app will automatically reload when you save changes
 
-
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
@@ -119,39 +118,59 @@ if 'progress' not in st.session_state:
     st.session_state.progress = 0
 if 'current_task' not in st.session_state:
     st.session_state.current_task = ""
+if 'agent_messages' not in st.session_state:
+    st.session_state.agent_messages = []
+if 'current_phase' not in st.session_state:
+    st.session_state.current_phase = 0
 
-# Run research when button is clicked
+# Replace the research execution section with this updated version
 if start_research and tech_theme:
     st.session_state.research_complete = False
     st.session_state.progress = 0
+    st.session_state.agent_messages = []
+    st.session_state.current_phase = 0
     
     # Create progress indicators
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Research phases
+    # Create containers for agent work display
+    agent_work_container = st.empty()
+    current_task_container = st.container()
+    
+    # Research phases with weights (total = 100)
+    # So each phase contributes a certain percentage to the progress bar
     phases = [
-        "Researching Technology Trends",
-        "Analyzing Technical Details",
-        "Structuring Content Outline",
-        "Validating Sources",
-        "Finalizing Research Report"
+        ("Researching Technology Trends", 25),
+        ("Analyzing Technical Details", 25),
+        ("Structuring Content Outline", 20),
+        ("Validating Sources", 15),
+        ("Finalizing Research Report", 15)
     ]
     
-    # Run research with progress updates
-    status_text.text(f"Starting research on: {tech_theme}")
-    
-    # Callback for progress updates
     def update_progress(phase_idx, message):
-        st.session_state.progress = (phase_idx + 1) * 20
-        st.session_state.current_task = message
-        progress_bar.progress(st.session_state.progress)
-        status_text.text(message)
-        if show_agent_work:
-            st.text(message)
+        """Update progress bar and agent work display"""
+        # Calculate cumulative progress
+        progress = sum([weight for _, weight in phases[:phase_idx]]) 
+        phase_name, phase_weight = phases[phase_idx]
+        
+        # Update session state
+        st.session_state.current_phase = phase_idx
+        st.session_state.current_task = phase_name
+        st.session_state.agent_messages.append(message)
+        
+        # Update progress bar based on phase weights
+        progress_value = progress / 100.0
+        progress_bar.progress(progress_value)
+        
+        # Update status
+        status_text.text(f"Current Phase: {phase_name}")
+
     
     try:
         # Run the research process
+        status_text.text(f"Starting research on: {tech_theme}")
+        
         result, output_file = run_research(
             tech_theme=tech_theme,
             research_focus=research_focus,
@@ -166,12 +185,21 @@ if start_research and tech_theme:
         st.session_state.output_file = output_file
         
         # Complete the progress bar
-        progress_bar.progress(100)
+        progress_bar.progress(1.0)
         status_text.text("Research complete! 🎉")
+        
+        # Show final agent work summary if enabled
+        if show_agent_work:
+            with current_task_container:
+                st.success("Research process completed successfully!")
+                st.markdown("### Final Agent Work Summary")
+                st.markdown(f"Total messages: {len(st.session_state.agent_messages)}")
+                with st.expander("View Full Agent Work Log"):
+                    for idx, msg in enumerate(st.session_state.agent_messages, 1):
+                        st.text(f"{idx}. {msg}")
         
     except Exception as e:
         st.error(f"An error occurred during research: {str(e)}")
-        # Debug info - show traceback
         st.expander("Debug Details").write(traceback.format_exc())
         st.session_state.research_complete = False
 

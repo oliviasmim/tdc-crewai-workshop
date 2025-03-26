@@ -135,8 +135,8 @@ class TechContentResearchTasks:
             
             Your final response MUST include:
             - A complete executive summary of the article plan
-            - An integrated outline with annotations for technical depth and source requirements
-            - A curated list of the most important and reliable sources
+            - An outline with annotations for technical depth and source requirements
+            - A curated list of the most important and reliable sources with links to them
             - Specific recommendations for making the article stand out from similar content
             - A publication readiness assessment with suggested next steps
             

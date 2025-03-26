@@ -139,8 +139,8 @@ class TechContentResearchTasks:
             
             Your final response MUST include:
             - A complete executive summary of the article plan
-            - An integrated outline with annotations for technical depth and source requirements
-            - A curated list of the most important and reliable sources
+            - An outline with annotations for technical depth and source requirements
+            - A curated list of the most important and reliable sources with links to them
             - Specific recommendations for making the article stand out from similar content
             - A publication readiness assessment with suggested next steps
             
@@ -149,6 +149,6 @@ class TechContentResearchTasks:
             business audiences interested in this technology space.
             """),
             agent=agent,
-            expected_output="A complete article blueprint in MD format only, with executive summary, integrated outline, curated source list, content recommendations, and publication readiness assessment for the specified technology theme.",
+            expected_output="The complete output, include the complete article blueprint must be in a user friendly md format. Included with executive summary, integrated outline, curated source list, content recommendations, and publication readiness assessment for the specified technology theme.",
             context=context
         )
