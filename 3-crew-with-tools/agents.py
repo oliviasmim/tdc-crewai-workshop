@@ -13,7 +13,7 @@ web_search_tool = WebsiteSearchTool()
 
 class TechContentCreator:
     def __init__(self):
-        self.llm = ChatOpenAI(model="gpt-3.5-turbo-16ko")
+        self.llm = ChatOpenAI(model="gpt-4o-mini")
 
     def trend_researcher_agent(self):
         return Agent(
@@ -117,9 +117,6 @@ class TechContentCreator:
                 sacrificing technical accuracy. You excel at identifying gaps in research,
                 logical inconsistencies, and opportunities to strengthen content through
                 additional context or sources."""),
-            tools=[
-                search_tool
-            ],
             llm=self.llm,
             verbose=True
         )
